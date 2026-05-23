@@ -59,6 +59,17 @@ body{background:var(--paper);color:var(--ink);font-family:var(--ff-body);font-we
 }
 .btn-dl:hover{background:#153fa3;transform:translateY(-1px);box-shadow:var(--shadow-lg)}
 .btn-dl svg{width:13px;height:13px;flex-shrink:0}
+.btn-pdf{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 20px;
+  background:transparent;color:var(--blue);
+  font-family:var(--ff-mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;
+  border:1.5px solid var(--blue);border-radius:4px;cursor:pointer;
+  transition:all .18s;
+}
+.btn-pdf:hover{background:var(--blue-l);transform:translateY(-1px);box-shadow:var(--shadow)}
+.btn-pdf svg{width:13px;height:13px;flex-shrink:0}
+.btn-pdf.loading{opacity:.6;pointer-events:none}
 
 /* ── HERO ── */
 .hero{
@@ -249,6 +260,7 @@ h1 em{font-style:italic;color:var(--blue)}
   .exp-top{flex-direction:column;gap:0}
 }
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
 
@@ -261,6 +273,10 @@ h1 em{font-style:italic;color:var(--blue)}
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
       Download .docx
     </a>
+    <button class="btn-pdf" id="btn-pdf" onclick="downloadPDF()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      Download PDF
+    </button>
   </div>
 </header>
 
@@ -503,6 +519,67 @@ h1 em{font-style:italic;color:var(--blue)}
 <footer class="page-footer">
   Dipak Narkhede &nbsp;·&nbsp; dipakn491@gmail.com &nbsp;·&nbsp; Pune, India &nbsp;·&nbsp; Immediate Joiner
 </footer>
+
+
+<script>
+function downloadPDF() {
+  const btn = document.getElementById('btn-pdf');
+  btn.classList.add('loading');
+  btn.textContent = 'Generating...';
+
+  // Elements to temporarily hide during PDF generation
+  const topbar  = document.querySelector('.topbar');
+  const heroPic = document.querySelector('.hero-photo');
+  const badge   = document.querySelector('.photo-badge');
+
+  // Save original display values
+  const topbarD  = topbar.style.display;
+  const heroPicD = heroPic ? heroPic.style.display : null;
+  const badgeD   = badge ? badge.style.display : null;
+
+  // Hide nav elements for a clean PDF
+  topbar.style.display = 'none';
+  if (heroPic) heroPic.style.display = 'none';
+  if (badge)   badge.style.display = 'none';
+
+  const element = document.body;
+
+  const opt = {
+    margin:       [10, 12, 10, 12],
+    filename:     'Dipak_Narkhede_Resume.pdf',
+    image:        { type: 'jpeg', quality: 0.97 },
+    html2canvas:  {
+      scale: 2,
+      useCORS: true,
+      logging: false,
+      letterRendering: true
+    },
+    jsPDF: {
+      unit: 'mm',
+      format: 'a4',
+      orientation: 'portrait'
+    },
+    pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+  };
+
+  html2pdf().set(opt).from(element).save().then(() => {
+    // Restore hidden elements
+    topbar.style.display = topbarD;
+    if (heroPic) heroPic.style.display = heroPicD;
+    if (badge)   badge.style.display = badgeD;
+
+    // Reset button
+    btn.classList.remove('loading');
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Download PDF`;
+  }).catch(() => {
+    topbar.style.display = topbarD;
+    if (heroPic) heroPic.style.display = heroPicD;
+    if (badge)   badge.style.display = badgeD;
+    btn.classList.remove('loading');
+    btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg> Download PDF`;
+  });
+}
+</script>
 
 </body>
 </html>
